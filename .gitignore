@@ -1,0 +1,20 @@
+node_modules/
+__pycache__/
+*.pyc
+.env
+*.log
+.DS_Store
+Thumbs.db
+
+# Libros descargados (binarios grandes, no van en Git)
+Biblioteca/**/*.pdf
+Biblioteca/**/*.epub
+Biblioteca/**/*.djvu
+Biblioteca/**/*.mobi
+Biblioteca/**/*.azw3
+Biblioteca/**/*.cbr
+Biblioteca/**/*.cbz
+
+# Pero SI trackear el indice compartido y el .gitkeep
+!Biblioteca/index.json
+!Biblioteca/.gitkeep

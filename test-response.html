@@ -1,0 +1,278 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <title>Vodafone Secure Net</title>
+    <style>
+        * {
+            font-family: arial !important;
+        }
+
+        .form__checkbox--bubble:focus+.form__label,
+        :focus {
+            outline: #00B0CA solid 2px
+        }
+
+        :active,
+        a:active,
+        a:hover {
+            outline: 0
+        }
+
+        .accordion__item,
+        .section--card {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .2)
+        }
+
+        .accordion__heading::after,
+        .bubble,
+        .carousel-old__slides::after,
+        .circle-tabs__content::after,
+        .grid::after,
+        .large-block-tabs__content::after,
+        .media::after,
+        .nudge-slim::after,
+        .radio-carousel__slider::after,
+        .row::after,
+        .section::after,
+        .table__tr::after,
+        .tabs>.tabs__content::after,
+        .tiles::after {
+            clear: both
+        }
+
+        .dial__passes,
+        .media--reverse {
+            direction: rtl
+        }
+
+        .accordion,
+        .bubble__dots,
+        .grid,
+        .list--reset,
+        .slider__slides,
+        .tiles {
+            list-style: none
+        }
+
+        .accordion__heading::after,
+        .accordion__heading::before,
+        .carousel-old__slides::after,
+        .carousel-old__slides::before,
+        .circle-tabs__content::after,
+        .circle-tabs__content::before,
+        .grid::after,
+        .grid::before,
+        .large-block-tabs__content::after,
+        .large-block-tabs__content::before,
+        .media::after,
+        .media::before,
+        .nudge-slim::after,
+        .nudge-slim::before,
+        .radio-carousel__slider::after,
+        .radio-carousel__slider::before,
+        .row::after,
+        .row::before,
+        .section::after,
+        .section::before,
+        .table__tr::after,
+        .table__tr::before,
+        .tabs>.tabs__content::after,
+        .tabs>.tabs__content::before,
+        .tiles::after,
+        .tiles::before {
+            content: " ";
+            display: table
+        }
+
+        [hidden],
+        body::before,
+        template {
+            display: none
+        }
+
+        a,
+        small {
+            display: inline-block
+        }
+
+        .caption__icon,
+        .carousel-gallery-pages__page-icon,
+        .carousel-old__control-icon,
+        .circle-tabs__icon,
+        .component--building .component__content::after,
+        .dial__cta-icon,
+        .dialog--interstitial .dialog__content,
+        .interstitial__spring,
+        .multimedia__play,
+        .video-stream__toggle,
+        .video-stream__toggle-icon,
+        .video-stream__video--center {
+            left: 50%;
+            position: absolute;
+            top: 50%;
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%)
+        }
+
+        .form__checkbox--bubble,
+        .toggle-switch__title--hide,
+        .visually-hidden {
+            background: #E60000 !important;
+            border: none !important;
+            clip: rect(0 0 0 0) !important;
+            height: 1px !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+            position: absolute !important;
+            width: 1px !important
+        }
+
+        blockquote,
+        body,
+        fieldset {
+            margin: 0
+        }
+
+        .content,
+        sub,
+        sup {
+            position: relative
+        }
+
+        .content,
+        .grid__item--1\/1,
+        blockquote,
+        table {
+            width: 100%
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes fade-zoom-out {
+            from {
+                opacity: 0;
+                transform: scale(1.05)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        @keyframes circle {
+            0% {
+                transform: scale(.6);
+                opacity: 0
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+
+        @keyframes value {
+            0% {
+                opacity: 0
+            }
+
+            100% {
+                opacity: 1
+            }
+        }
+
+        @keyframes fade-in-extended {
+
+            0%,
+            75% {
+                opacity: 0
+            }
+
+            100% {
+                opacity: 1
+            }
+        }
+
+        @keyframes flickering {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .6
+            }
+        }
+
+        @font-face {
+            font-family: VodafoneLight;
+            font-style: normal;
+            font-weight: 400;
+            src: url(../../fonts/group/vodafone/gre/vodafone-light.eot);
+            src: url(../../fonts/group/vodafone/gre/vodafone-light.eot?#ie-fix) format("embedded-opentype"), url(../../fonts/group/vodafone/gre/vodafone-light.woff) format("woff");
+            unicode-range: "U+1F00-1FFF, U+0370-03FF"
+        }
+
+        @font-face {
+            font-family: VodafoneRegular;
+            font-style: normal;
+            font-weight: 400;
+            src: url(../../fonts/group/vodafone/gre/vodafone-regular.eot);
+            src: url(../../fonts/group/vodafone/gre/vodafone-regular.eot?#ie-fix) format("embedded-opentype"), url(../../fonts/group/vodafone/gre/vodafone-regular.woff) format("woff");
+            unicode-range: "U+1F00-1FFF, U+0370-03FF"
+        }
+
+        @font-face {
+            font-family: VodafoneRegularBold;
+            font-style: normal;
+            font-weight: 400;
+            src: url(../../fonts/group/vodafone/gre/vodafone-bold.eot);
+            src: url(../../fonts/group/vodafone/gre/vodafone-bold.eot?#ie-fix) format("embedded-opentype"), url(../../fonts/group/vodafone/gre/vodafone-bold.woff) format("woff");
+            unicode-range: "U+1F00-1FFF, U+0370-03FF"
+        }
+
+        @font-face {
+            font-family: VodafoneLight;
+            font-style: normal;
+            font-weight: 400;
+            src: url(../../fonts/group/vodafone/ara/vodafone-light.eot);
+            src: url(../../fonts/group/vodafone/ara/vodafone-light.eot?#ie-fix) format("embedded-opentype"), url(../../fonts/group/vodafone/ara/vodafone-light.woff) format("woff");
+            unicode-range: "U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+E0FF, U+EFFD, U+F000, U+FB50-FDFF, U+FE80-FEFC"
+        }
+
+        @font-face {
+            font-family: VodafoneRegular;
+            font-style: normal;
+            font-weight: 400;
+            src: url(../../fonts/group/vodafone/ara/vodafone-regular.eot);
+            src: url(../../fonts/group/vodafone/ara/vodafone-regular.eot?#ie-fix) format("embedded-opentype"), url(../../fonts/group/vodafone/ara/vodafone-regular.woff) format("woff");
+            unicode-range: "U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+E0FF, U+EFFD, U+F000, U+FB50-FDFF, U+FE80-FEFC"
+        }
+
+        @font-face {
+            font-family: VodafoneRegularBold;
+            font-style: normal;
+            font-weight: 400;
+            src: url(../../fonts/group/vodafone/ara/vodafone-bold.eot);
+            src: url(../../fonts/group/vodafone/ara/vodafone-bold.eot?#ie-fix) format("embedded-opentype"), url(../../fonts/group/vodafone/ara/vodafone-bold.woff) format("woff");
+      
