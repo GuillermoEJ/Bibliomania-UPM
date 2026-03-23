@@ -7,6 +7,7 @@ import {
   REQUEST_DELAY_MS,
   REQUEST_TIMEOUT_MS,
 } from './config.js';
+import { searchWithPuppeteer, closeBrowser } from './puppeteer-helper.js';
 
 /**
  * @typedef {Object} SearchResult
@@ -21,8 +22,19 @@ import {
 
 const HEADERS = {
   'User-Agent': USER_AGENT,
-  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+  'Accept-Encoding': 'gzip, deflate, br',
   'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+  'Cache-Control': 'no-cache',
+  'Pragma': 'no-cache',
+  'Sec-Ch-Ua': '"Not A(Brand";v="99", "Google Chrome";v="131", "Chromium";v="131"',
+  'Sec-Ch-Ua-Mobile': '?0',
+  'Sec-Ch-Ua-Platform': '"Windows"',
+  'Sec-Fetch-Dest': 'document',
+  'Sec-Fetch-Mode': 'navigate',
+  'Sec-Fetch-Site': 'none',
+  'Sec-Fetch-User': '?1',
+  'Upgrade-Insecure-Requests': '1',
 };
 
 /**
@@ -73,14 +85,6 @@ function delay(ms = REQUEST_DELAY_MS) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * Busca un libro en Anna's Archive.
- * Realiza busquedas priorizando formatos segun FORMAT_PRIORITY.
- *
- * @param {string} query - Consulta de busqueda (titulo, autor, ISBN)
- * @param {string[]} [preferredFormats] - Formatos preferidos en orden
- * @returns {Promise<SearchResult[]>}
- */
 export async function searchBook(query, preferredFormats = FORMAT_PRIORITY) {
   const allResults = [];
 
@@ -92,26 +96,61 @@ export async function searchBook(query, preferredFormats = FORMAT_PRIORITY) {
     sort: '',
   });
 
+  // Intentar primero con fetch simple
   try {
     const { response, domain } = await fetchWithFailover(`/search?${params}`);
     const html = await response.text();
-    const results = parseSearchResults(html, domain);
-    allResults.push(...results);
+
+    // Detectar si es página de Cloudflare
+    if (html.includes('Verifying your connection') || html.includes('cf_challenge')) {
+      console.log(chalk.yellow(`  ⚠ Cloudflare detectado en ${domain}, usando navegador...`));
+      const puppeteerResult = await searchWithPuppeteer(query, ANNAS_ARCHIVE_DOMAINS);
+      if (puppeteerResult.error) {
+        throw new Error(puppeteerResult.error);
+      }
+      const results = parseSearchResults(puppeteerResult.html, puppeteerResult.domain, query);
+      allResults.push(...results);
+    } else {
+      const results = parseSearchResults(html, domain, query);
+      allResults.push(...results);
+    }
   } catch (err) {
-    console.log(chalk.red(`  Error buscando "${query}": ${err.message}`));
-    return [];
+    console.log(chalk.yellow(`  ⚠ Fetch falló, intentando con navegador: ${err.message}`));
+    // Fallback a Puppeteer
+    try {
+      const puppeteerResult = await searchWithPuppeteer(query, ANNAS_ARCHIVE_DOMAINS);
+      if (!puppeteerResult.error) {
+        const results = parseSearchResults(puppeteerResult.html, puppeteerResult.domain, query);
+        allResults.push(...results);
+      } else {
+        console.log(chalk.red(`  Error con ambos métodos: ${puppeteerResult.error}`));
+        return [];
+      }
+    } catch (puppeteerErr) {
+      console.log(chalk.red(`  Error buscando "${query}": ${puppeteerErr.message}`));
+      return [];
+    }
   }
 
   if (allResults.length === 0) {
     const simplifiedQuery = simplifyQuery(query);
     if (simplifiedQuery !== query) {
       await delay();
-      const params2 = new URLSearchParams({ q: simplifiedQuery });
       try {
+        const params2 = new URLSearchParams({ q: simplifiedQuery });
         const { response, domain } = await fetchWithFailover(`/search?${params2}`);
         const html = await response.text();
-        const results = parseSearchResults(html, domain);
-        allResults.push(...results);
+
+        if (html.includes('Verifying your connection') || html.includes('cf_challenge')) {
+          const puppeteerResult = await searchWithPuppeteer(simplifiedQuery, ANNAS_ARCHIVE_DOMAINS);
+          if (!puppeteerResult.error) {
+            const results = parseSearchResults(puppeteerResult.html, puppeteerResult.domain, simplifiedQuery);
+            allResults.push(...results);
+          }
+        } else {
+          const results = parseSearchResults(html, domain, simplifiedQuery);
+          allResults.push(...results);
+        }
       } catch {
         // Silenciar error en busqueda simplificada
       }
@@ -125,14 +164,61 @@ export async function searchBook(query, preferredFormats = FORMAT_PRIORITY) {
  * Parsea los resultados de busqueda de Anna's Archive.
  * @param {string} html
  * @param {string} domain
+ * @param {string} query
  * @returns {SearchResult[]}
  */
-function parseSearchResults(html, domain) {
+function parseSearchResults(html, domain, query = '') {
   const $ = cheerio.load(html);
   const results = [];
   const seenMd5 = new Set();
 
-  $('a[href*="/md5/"]').each((_i, elem) => {
+  // Debug: verificar estructura HTML
+  const mdLinks = $('a[href*="/md5/"]');
+  const totalLinks = $('a[href]').length;
+
+  if (mdLinks.length === 0 && totalLinks > 0) {
+    // Intentar alternativas cuando no hay enlaces /md5/
+    console.log(chalk.gray(`    (Sin enlaces /md5/, buscando alternativas...)`));
+
+    // Buscar patrones alternativos
+    const allLinks = $('a[href]');
+    const bookPatterns = ['/book/', '/isbn/', '/title/'];
+
+    allLinks.each((_i, elem) => {
+      const href = $(elem).attr('href');
+      if (!href) return;
+
+      const isBook = bookPatterns.some((p) => href.includes(p)) || href.includes('/md5/');
+      if (!isBook) return;
+
+      try {
+        const text = $(elem).text().trim();
+        if (text.length < 2) return;
+
+        results.push({
+          title: text.substring(0, 200),
+          author: '',
+          extension: '',
+          size: '',
+          language: '',
+          detailPath: href,
+          domain,
+        });
+      } catch {
+        // Saltar resultado que no se puede procesar
+      }
+    });
+
+    if (results.length === 0) {
+      // Si tampoco encontramos con alternativas, guardar HTML para debug
+      const haveCloudflare = html.includes('Verifying') || html.includes('cf_challenge');
+      const haveContent = html.length > 5000;
+
+      console.log(chalk.gray(`    Tamaño HTML: ${html.length} bytes, Cloudflare: ${haveCloudflare}, Contenido: ${haveContent}`));
+    }
+  }
+
+  mdLinks.each((_i, elem) => {
     try {
       const $elem = $(elem);
       const href = $elem.attr('href');

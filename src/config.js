@@ -3,11 +3,16 @@
 // Dominios de Anna's Archive ordenados por fiabilidad.
 // Los dominios .org y .se fueron suspendidos en enero 2026.
 // Actualizar esta lista si cambian: https://en.wikipedia.org/wiki/Anna%27s_Archive
+// Nota: Si está bloqueado por firewall corporativo, intente usar un VPN
 export const ANNAS_ARCHIVE_DOMAINS = [
   'annas-archive.gs',
   'annas-archive.vg',
   'annas-archive.pk',
   'annas-archive.gd',
+  'annas-archive.net',
+  'annas-archive.is',
+  'annas-archive.how',
+  'annas-archive.gg',
 ];
 
 // Formatos de libro ordenados por preferencia

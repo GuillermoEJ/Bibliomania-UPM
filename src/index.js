@@ -11,6 +11,7 @@ import { findAndResolveBook, resolveBookByMd5 } from './anna.js';
 import { downloadBook } from './downloader.js';
 import { loadIndex, saveIndex, registerBook, findBookInIndex, computeFileHash } from './registry.js';
 import { extractBibliographyWithLLM, isLLMAvailable } from './llm.js';
+import { closeBrowser } from './puppeteer-helper.js';
 import { BIBLIOTECA_DIR, REQUEST_DELAY_MS } from './config.js';
 
 const PROJECT_ROOT = resolve(import.meta.dirname, '..');
@@ -45,12 +46,19 @@ program.parse();
  * @property {import('./registry.js').IndexEntry|null} indexEntry
  */
 
-/**
- * Funcion principal que orquesta todo el flujo.
- * @param {string} pdfPath
- * @param {Object} options
- */
 async function run(pdfPath, options) {
+  try {
+    await runInternal(pdfPath, options);
+  } finally {
+    // Asegurar que el navegador Puppeteer se cierre siempre
+    await closeBrowser();
+  }
+}
+
+/**
+ * Funcion interna que realiza el procesamiento.
+ */
+async function runInternal(pdfPath, options) {
   const resolvedPath = resolve(pdfPath);
 
   printHeader();
